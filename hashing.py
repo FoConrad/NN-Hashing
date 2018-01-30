@@ -37,28 +37,35 @@ class RNN(nn.Module):
     def forward(self, input_gen):
         output = Variable(torch.zeros(self.output_size))
         for chunk in input_gen:
-            input_ = torch.cat((Variable(torch.FloatTensor(chunk) / 256), output))
+            input_ = torch.cat((Variable(torch.FloatTensor(chunk)), output))
             output = self.step(input_)
         return output
 
+def expand_bytes(bytes_):
+    return reduce(add, 
+            [b'\x01' if (byte & 1<<bit) else b'\x00' \
+                    for byte in bytes_ \
+                    for bit in reversed(range(8))])
 
 def file_gen(file_name, chunksize):
     with open(file_name, 'rb') as fp:
         while True:
             bytes_ = fp.read(chunksize)
             if bytes_:
-                yield bytes_.ljust(chunksize, b'\0')
+                yield expand_bytes(bytes_.ljust(chunksize, b'\0'))
             else:
                 break
 
-def main():
+#def main():
+if __name__ == '__main__': # expose variables to ipython
     torch.manual_seed(42)
-    model = model = RNN(64, [1204, 2048], 16)
+    model = model = RNN(512, [1204, 2048], 128)
     g = file_gen(sys.argv[1], 64)
 
     output = model(g).data.cpu().numpy().tolist()
-    f = lambda i: hex(min(255, max(0, int(256 * i))))[2:]
-    print('{}'.format( reduce(add, map(f, output)) ))
+    f = lambda i: str(int(i + .5))
+    o = hex(int(reduce(add, map(f, output)), 2))
+    print('{}'.format(o)) 
 
-if __name__ == '__main__':
-    main()
+#if __name__ == '__main__':
+    #main()
