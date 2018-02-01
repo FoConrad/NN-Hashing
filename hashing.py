@@ -14,7 +14,7 @@ from torch import optim
 
 
 class RNN(nn.Module):
-    def __init__(self, raw_input_size, hidden_sizes, output_size, 
+    def __init__(self, raw_input_size, hidden_sizes, output_size,
             data_err=False, gen_length=0):
         super(RNN, self).__init__()
         self.raw_input_size = raw_input_size
@@ -36,7 +36,7 @@ class RNN(nn.Module):
         self.out = nn.Sigmoid()
 
         if data_err:
-            self.r = nn.Parameter(data=torch.zeros(gen_length,raw_input_size), 
+            self.r = nn.Parameter(data=torch.zeros(gen_length,raw_input_size),
                     requires_grad=True) # really small initial values
 
     def step(self, input_):
@@ -53,7 +53,7 @@ class RNN(nn.Module):
         return output
 
 def expand_bytes(bytes_):
-    return reduce(add, 
+    return reduce(add,
             [b'\x01' if (byte & 1<<bit) else b'\x00' \
                     for byte in bytes_ \
                     for bit in reversed(range(8))])
@@ -97,7 +97,7 @@ if __name__ == '__main__': # expose variables to ipython
 
     # Define model and target
     source_data = file_gen(args.source, 512 // 8)
-    model = model = RNN(512, [1204, 2048], 128, data_err=True, 
+    model = model = RNN(512, [1204, 2048], 128, data_err=True,
             gen_length=len(source_data))
 
     target_output = model(file_gen(args.target, 512 // 8), ignore_data_err=True)
