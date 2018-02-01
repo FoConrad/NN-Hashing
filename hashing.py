@@ -3,9 +3,11 @@
 import sys
 import argparse
 import binascii
+import itertools
 from functools import reduce
 from operator import add
 
+import numpy as np
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
@@ -81,19 +83,57 @@ def equality(first, second):
     o_second = hex(int(reduce(add, map(f, second)), 2))
     return o_first == o_second
 
+def finish_succesful(input_, r):
+    input_ = nn.Parameter(torch.FloatTensor(input_))
+    data = (input_ + r).data.numpy()
+    low, high = data[data < .5], data[data >= .5]
+    print('Low mean: {}, std: {}, min: {}, max: {}'.format(np.mean(low),
+        np.std(low), np.min(low), np.max(low)))
+    print('High mean: {}, std: {}, min: {}, max: {}'.format(np.mean(high),
+        np.std(high), np.min(high), np.max(high)))
+
+# W function with zeros as 0 and 1, the two valid binary inputs
+def my_loss(data, r):
+    data = nn.Parameter(torch.FloatTensor(data))
+    x = data + r
+    ret = torch.mean(torch.pow(x * (x - 1), 2))
+    return ret
+
+def write_output(input_, r, output_name):
+    input_ = nn.Parameter(torch.FloatTensor(input_))
+    data = ((input_ + r).data.numpy() >= .5).flatten().astype(int).tolist()
+    o = hex(int(reduce(add, map(str, data)), 2))
+    with open(output_name, 'wb') as fout:
+        fout.write(binascii.unhexlify(o[2:]))
 
 if __name__ == '__main__': # expose variables to ipython
     # Without this experiments are not repeatable!
     torch.manual_seed(42)
 
     # Argument parsing
-    parser = argparse.ArgumentParser(description='Attack RNN hasher.')
+    parser = argparse.ArgumentParser(description='Attack RNN hasher.',
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('target', type=str, help='target file for target hash value')
     parser.add_argument('--source', type=str, default=None,
             help='source file to be transformed to have target hash')
-    parser.add_argument('--output', type=str, default='hash_me',
+    parser.add_argument('--output', type=str, default=None,
             help='source file to be transformed to have target hash')
+    parser.add_argument('--adam-lr', type=float, default=1.,
+            help='learning rate for adam optimizer')
+    parser.add_argument('--loss-reg', type=float, default=0.0045,
+            help='coefficient for loss regularization')
+    parser.add_argument('--iters', type=int, default=0,
+            help='how many iterations to optimize for (default is infinite loop)')
     args = parser.parse_args()
+
+    # Simple checking
+    if args.source is None:
+        target_data = file_gen(args.target, 512 // 8)
+        model = model = RNN(512, [1204, 2048], 128, data_err=True,
+                gen_length=len(target_data))
+        target_output = model(target_data, ignore_data_err=True)
+        print_hash(target_output, 'target hash')
+        sys.exit(0)
 
     # Define model and target
     source_data = file_gen(args.source, 512 // 8)
@@ -103,24 +143,27 @@ if __name__ == '__main__': # expose variables to ipython
     target_output = model(file_gen(args.target, 512 // 8), ignore_data_err=True)
     target_output = Variable(target_output.data, requires_grad=False)
     source_orig = model(source_data, ignore_data_err=True)
-    print_hash(target_output, 'target hash')
     print_hash(source_orig, 'original source hash')
-
-    if args.source is None:
-        sys.exit(0)
+    print_hash(target_output, 'target hash')
 
     softmaxwithxent = nn.MSELoss()
-    optimizer = optim.Adam(params=[model.r], lr=1)
+    optimizer = optim.Adam(params=[model.r], lr=args.adam_lr)
 
-    for iteration in range(10000):
+    success = False
+    for iteration in range(args.iters) if args.iters else itertools.count():
         optimizer.zero_grad()
         outputs = model(source_data, ignore_data_err=False)
 
         xent_loss = softmaxwithxent(outputs, target_output)
-        adv_loss = xent_loss
+        adv_loss = xent_loss + args.loss_reg * my_loss(source_data, model.r)
 
         if equality(target_output, outputs):
-            print('\nWE DID IT')
+            success = True
+            print_hash(outputs, 'step... {}'.format(iteration), end='\r')
+            print('\n..success')
+            finish_succesful(source_data, model.r)
+            if args.output is not None:
+                write_output(source_data, model.r, args.output)
             break
 
         if iteration % 10 == 0:
@@ -130,4 +173,5 @@ if __name__ == '__main__': # expose variables to ipython
         optimizer.step()
 
     # Done
-    print(' '*40 + '.....done\n')
+    if not success:
+        print('\n...failed')
