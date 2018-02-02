@@ -87,9 +87,9 @@ def finish_succesful(input_, r):
     input_ = nn.Parameter(torch.FloatTensor(input_))
     data = (input_ + r).data.numpy()
     low, high = data[data < .5], data[data >= .5]
-    print('Low mean: {}, std: {}, min: {}, max: {}'.format(np.mean(low),
+    print('Low mean: {:.4f}, std: {:.4f}, min: {:.4f}, max: {:.4f}'.format(np.mean(low),
         np.std(low), np.min(low), np.max(low)))
-    print('High mean: {}, std: {}, min: {}, max: {}'.format(np.mean(high),
+    print('High mean: {:.4f}, std: {:.4f}, min: {:.4f}, max: {:.4f}'.format(np.mean(high),
         np.std(high), np.min(high), np.max(high)))
 
 # W function with zeros as 0 and 1, the two valid binary inputs
@@ -159,11 +159,14 @@ if __name__ == '__main__': # expose variables to ipython
 
         if equality(target_output, outputs):
             success = True
-            print_hash(outputs, 'step... {}'.format(iteration), end='\r')
+            print_hash(outputs, 'SUCCESS {} *'.format(iteration), end='\r')
             print('\n..success')
             finish_succesful(source_data, model.r)
             if args.output is not None:
-                write_output(source_data, model.r, args.output)
+                try:
+                    write_output(source_data, model.r, args.output)
+                except:
+                    sys.exit(1)
             break
 
         if iteration % 10 == 0:
