@@ -14,8 +14,10 @@ from torch.nn import functional as F
 from torch.autograd import Variable
 from torch import optim
 
+# There seems to be an unreasonably large amount of changes to the code to 
+# target the GPU. This is not a pretty solution but better than 'if' statements
+# around all the torch.FloatTenor creations.
 CUDA = False
-
 def cudize(in_):
     global CUDA
     return in_.cuda() if CUDA else in_
@@ -80,7 +82,7 @@ class HashAttack(object):
             ignore_data_err=True).data, requires_grad=False)
 
     @staticmethod
-    def read_file(file_name, chunksize=64): # chunk size in bytes
+    def read_file(file_name, chunksize=64): # chunksize is in bytes
         data = []
         with open(file_name, 'rb') as fp:
             while True:
@@ -144,7 +146,6 @@ class HashAttack(object):
         self.report_hash(target_output, 'target hash')
 
     def iterate(self, steps=0):
-        # Define model and target
         self.report_hash(self._source['output'], 'original source hash')
         self.report_hash(self._target['output'], 'target hash')
         mse_loss = nn.MSELoss()
@@ -158,7 +159,7 @@ class HashAttack(object):
             adv_loss = loss + self._loss_reg * self.loss_reg(self._model.r)
             if self.check_eq(self._target['output'], outputs):
                 success = True
-                self.report_hash(outputs, 'step... {}'.format(iteration))
+                self.report_hash(outputs, 'step... {} *'.format(iteration))
                 self.report_successful(self._source['param'], self._model.r)
                 self.write_output(self._model.r)
                 break
@@ -168,7 +169,6 @@ class HashAttack(object):
             adv_loss.backward()
             optimizer.step()
 
-        # Done
         print('\n...{}'.format('success' if success else 'failure'))
 
 
@@ -176,7 +176,6 @@ if __name__ == '__main__': # expose variables to ipython
     # Without this experiments are not repeatable!
     torch.manual_seed(42)
 
-    # Argument parsing
     parser = argparse.ArgumentParser(description='Attack RNN hasher.',
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('target', type=str,
