@@ -4,7 +4,7 @@ import sys
 import argparse
 import binascii
 import itertools
-from functools import reduce
+from functools import reduce, partial
 from operator import add
 
 import numpy as np
@@ -69,11 +69,11 @@ class HashAttack(object):
         self._adam_lr = adam_lr
         self._loss_reg = loss_reg
         if source is None:
-            self._model = cudize(model_class(512, [1204, 2048], 128,
-                data_err=False, gen_length=len(self._target['data'])))
+            self._model = cudize(model_class(data_err=False, 
+                gen_length=len(self._target['data'])))
         else:
-            self._model = cudize(model_class(512, [1204, 2048], 128,
-                data_err=True, gen_length=len(self._source['data'])))
+            self._model = cudize(model_class(data_err=True, 
+                gen_length=len(self._source['data'])))
             self._source['output'] = Variable(self._model(self._source['data'],
                 ignore_data_err=True).data, requires_grad=False)
             self._source['param'] = nn.Parameter(
@@ -125,6 +125,8 @@ class HashAttack(object):
             np.mean(high), np.std(high), np.min(high), np.max(high)))
 
     def write_output(self, r):
+        if self._output_name is None:
+            return
         data = ((self._source['param'] + r).data.cpu().numpy() >= .5)
         data = data.flatten().astype(int).tolist()
         o = hex(int(reduce(add, map(str, data)), 2))
@@ -195,8 +197,9 @@ if __name__ == '__main__': # expose variables to ipython
     args = parser.parse_args()
 
     CUDA = args.cuda
-    att = HashAttack(RNN, args.target, source=args.source, output=args.output,
-            adam_lr=args.adam_lr, loss_reg=args.loss_reg)
+    att = HashAttack(partial(RNN, 512, [1204, 2048], 128), args.target, 
+            source=args.source, output=args.output, adam_lr=args.adam_lr, 
+            loss_reg=args.loss_reg)
     if args.source:
         att.iterate()
     else:
