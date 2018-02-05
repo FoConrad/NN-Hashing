@@ -130,8 +130,11 @@ class HashAttack(object):
         data = ((self._source['param'] + r).data.cpu().numpy() >= .5)
         data = data.flatten().astype(int).tolist()
         o = hex(int(reduce(add, map(str, data)), 2))
-        with open(self._output_name, 'wb') as fout:
-            fout.write(binascii.unhexlify(o[2:]))
+        try:
+            with open(self._output_name, 'wb') as fout:
+                fout.write(binascii.unhexlify(o[2:]))
+        except:
+            pass
 
     # W function with zeros as 0 and 1, the two valid binary inputs
     def loss_reg(self, r):
@@ -201,6 +204,6 @@ if __name__ == '__main__': # expose variables to ipython
             source=args.source, output=args.output, adam_lr=args.adam_lr, 
             loss_reg=args.loss_reg)
     if args.source:
-        att.iterate()
+        att.iterate(args.iters)
     else:
         att.query()
