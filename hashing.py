@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import sys
 import argparse
 import binascii
 import itertools
@@ -14,51 +13,7 @@ from torch.nn import functional as F
 from torch.autograd import Variable
 from torch import optim
 
-# There seems to be an unreasonably large amount of changes to the code to 
-# target the GPU. This is not a pretty solution but better than 'if' statements
-# around all the torch.FloatTenor creations.
-CUDA = False
-def cudize(in_):
-    global CUDA
-    return in_.cuda() if CUDA else in_
-
-
-class RNN(nn.Module):
-    def __init__(self, raw_input_size, hidden_sizes, output_size,
-            data_err=False, gen_length=0):
-        super(RNN, self).__init__()
-        self.raw_input_size = raw_input_size
-        self.output_size = output_size
-        self.data_err = data_err
-
-        act = nn.Tanh()
-        last_size = raw_input_size + output_size
-        sequentials = []
-        for hsize in hidden_sizes:
-            sequentials.append(nn.Linear(last_size, hsize))
-            sequentials.append(act)
-            last_size = hsize
-        sequentials.append(nn.Linear(last_size, output_size))
-
-        self.features = nn.Sequential(*sequentials)
-        self.out = nn.Sigmoid()
-        if data_err:
-            self.r = nn.Parameter(data=cudize(torch.zeros(gen_length,
-                raw_input_size)), requires_grad=True)
-
-    def step(self, input_):
-        return self.out(self.features(input_))
-
-    def forward(self, input_gen, ignore_data_err=True):
-        output = Variable(cudize(torch.zeros(self.output_size)))
-        for index, chunk in enumerate(input_gen):
-            input_ = Variable(cudize(torch.FloatTensor(chunk)))
-            if not ignore_data_err:
-                input_ += self.r[index]
-            input_ = torch.cat((input_, output))
-            output = self.step(input_)
-        return output
-
+from models import RNN
 
 class HashAttack(object):
     def __init__(self, model_class, target, source=None, output=None,
@@ -69,15 +24,15 @@ class HashAttack(object):
         self._adam_lr = adam_lr
         self._loss_reg = loss_reg
         if source is None:
-            self._model = cudize(model_class(data_err=False, 
-                gen_length=len(self._target['data'])))
+            self._model = model_class(data_err=False,
+                    gen_length=len(self._target['data'])).cudize()
         else:
-            self._model = cudize(model_class(data_err=True, 
-                gen_length=len(self._source['data'])))
+            self._model = model_class(data_err=True,
+                gen_length=len(self._source['data'])).cudize()
             self._source['output'] = Variable(self._model(self._source['data'],
                 ignore_data_err=True).data, requires_grad=False)
             self._source['param'] = nn.Parameter(
-                    cudize(torch.FloatTensor(self._source['data'])))
+                self._model._cudize(torch.FloatTensor(self._source['data'])))
         self._target['output'] = Variable(self._model(self._target['data'],
             ignore_data_err=True).data, requires_grad=False)
 
@@ -199,10 +154,11 @@ if __name__ == '__main__': # expose variables to ipython
             help='use GPU or not')
     args = parser.parse_args()
 
-    CUDA = args.cuda
-    att = HashAttack(partial(RNN, 512, [1204, 2048], 128), args.target, 
-            source=args.source, output=args.output, adam_lr=args.adam_lr, 
+    _cudize = lambda in_: in_.cuda() if args.cuda else in_
+    att = HashAttack(partial(RNN, 512, [1204, 2048], 128, _cudize), args.target,
+            source=args.source, output=args.output, adam_lr=args.adam_lr,
             loss_reg=args.loss_reg)
+
     if args.source:
         att.iterate(args.iters)
     else:
