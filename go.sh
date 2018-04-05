@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+###############################################################################
+#
+# This code continually finds collisions for target_random then saves the 
+# binarized output file. It then checks if the hash for the binarized output
+# file matches the hash for the target_random file. If so, a true collision has
+# been found.
+#
+###############################################################################
+
 target_string=$(./hashing.py test_files/target_random | cut -d' ' -f1)
 
 echo "$target_string -- target"
