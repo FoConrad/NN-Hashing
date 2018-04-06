@@ -7,7 +7,7 @@
 % to avoid loading the natbib package, add option nonatbib:
 % \usepackage[nonatbib]{nips_2017}
 
-\usepackage{nips_2017}
+\usepackage[final]{nips_2017}
 
 % to compile a camera-ready version, add the [final] option, e.g.:
 % \usepackage[final]{nips_2017}
@@ -78,6 +78,8 @@
 Perform a literature review: what work has been done in this area already? How does
 your work relate to previous work? 
 
+Here is a simple citation of \cite{DBLP:journals/corr/SzegedyZSBEGF13}.
+
 \section{Baselines}
 
 Replicate (actually re-code in PyTorch) and run some baselines to which you will
@@ -91,6 +93,8 @@ This does not have to be final, you may find that as you collect results from yo
 experiments, you will want to change your approach based on what works and what
 doesn't.
 
-\section*{References}
+%\section*{References}
+\bibliography{ref} 
+\bibliographystyle{acm}
 
 \end{document}
