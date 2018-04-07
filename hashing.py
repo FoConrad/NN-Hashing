@@ -39,6 +39,8 @@ def main():
     if not args.no_seed:
         torch.manual_seed(42)
         numpy.random.seed(42)
+        if args.cuda:
+            torch.cuda.manual_seed(42)
 
     _cudize = lambda in_: in_.cuda() if args.cuda else in_
     att = L2Attack(model_class=partial(RNN, 512, [1204, 2048], 128, _cudize), 
