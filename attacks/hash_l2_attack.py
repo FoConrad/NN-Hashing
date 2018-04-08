@@ -4,9 +4,9 @@ import torch
 import torch.nn as nn
 from torch import optim
 
-from . import BaseAttack
+from . import HashBaseAttack
 
-class L2Attack(BaseAttack):
+class HashL2Attack(HashBaseAttack):
     def __init__(self, adam_lr=1., reg_coeff=0.0045, **kwargs):
         super().__init__(**kwargs)
         self._reg_coeff = reg_coeff

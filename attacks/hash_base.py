@@ -9,7 +9,7 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 
-class BaseAttack(object, metaclass=abc.ABCMeta):
+class HashBaseAttack(object, metaclass=abc.ABCMeta):
     def __init__(self, model_class, target, source=None, output=None):
         self._target = {'data': self.read_file(target)}
         self._source = {'data': self.read_file(source)} if source else None
@@ -34,7 +34,7 @@ class BaseAttack(object, metaclass=abc.ABCMeta):
             while True:
                 bytes_ = fp.read(chunksize)
                 if bytes_:
-                    data.append(BaseAttack.expand_bytes(
+                    data.append(HashBaseAttack.expand_bytes(
                         bytes_.ljust(chunksize, b'\0')))
                 else:
                     break
