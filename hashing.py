@@ -5,8 +5,8 @@ from functools import partial
 import numpy
 import torch
 
-from models import RNN
-from attacks import L2Attack
+from models import RNN, CNN
+from attacks import HashL2Attack
 
 def get_args():
     parser = argparse.ArgumentParser(description='Attack RNN hasher.',
@@ -43,7 +43,7 @@ def main():
             torch.cuda.manual_seed(42)
 
     _cudize = lambda in_: in_.cuda() if args.cuda else in_
-    att = L2Attack(model_class=partial(RNN, 512, [1204, 2048], 128, _cudize), 
+    att = HashL2Attack(model_class=partial(RNN, 512, [1204, 2048], 128, _cudize), 
                    target=args.target,
                    source=args.source, 
                    output=args.output, 
