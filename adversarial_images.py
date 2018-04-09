@@ -101,6 +101,8 @@ if __name__ == '__main__':
             help='train target model and generate 5k examples for testing')
     parser.add_argument('--attack', type=str, choices=('lbfgs', 'fgsm', 'jsma'),
             help='train target model and generate 5k examples for testing')
+    parser.add_argument('--epsilon', type=float, default=0.5,
+            help='step size for adversarial example generation using fgsm')
     args = parser.parse_args()
 
     base_dir = 'image_misc'
@@ -120,7 +122,7 @@ if __name__ == '__main__':
                 cnn_model_weights)
     elif args.attack == 'fgsm':
         mnb = MNIST_FGSM(partial(CNN, (28,28), 6, 10, lambda i: i),
-                cnn_model_weights,0.5)
+                cnn_model_weights, args.epsilon)
     elif args.attack == 'jsma':
         mnb = MNIST_JSMA(partial(CNN, (28,28), 6, 10, lambda i: i),
                 cnn_model_weights)
