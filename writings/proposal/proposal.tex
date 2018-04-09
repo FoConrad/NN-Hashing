@@ -66,24 +66,68 @@
 
 \section{Literature Review}
 
-Perform a literature review: what work has been done in this area already? How does
-your work relate to previous work? 
+The two areas of literature that concern our project are \emph{adversarial examples},
+and \emph{Neural hash functions}.
 
-Here is a simple citation of \cite{DBLP:journals/corr/SzegedyZSBEGF13} here.
+\subsection{Adversarial Examples}
+Interest in adversarial examples started around the time of their description
+in \cite{intriguing}. Here authors discovered that it is possible to craft
+example images that look very much like one class, yet are confidently classified
+as another by a neural network.
+
+After this result, Goodfellow et. al. developed a faster method of generating
+adversarial examples and studied some of their properties in \cite{explaining}.
+One of the original thoughts as to the reason for these was due to un-smooth 
+loss surfaces, which led to a proposed defense though distillation \cite{distil}.
+
+Though distillation seemed promising, it turned out it was only performing well
+on simple attacks. In fact, adversarial examples were shown to be relatively
+robust, living in about 25 dimensions of the input data space \cite{space}.
+
+Many attacks using adversarial examples have been performed on RL policies, vision,
+and audio \cite{policy,intriguing,audio}. There have also been numerous techniques
+for defense against these attacks, some based on robust optimization, and others
+on ensemble models \cite{robust,ensemble}.
+
+\subsection{Neural Hash Functions}
+
+Neural network popularity has led to many unique uses for them. Some in already
+solved domains. In \cite{hash1} an RNN is used to process data and produce
+a fixed length hash value. This work measured the entropy of the hash function
+by how many digits in the hash hexadecimal code were changed. Other authors,
+including \cite{hash2} have also proposed using neural networks to create
+one-way hash functions.
 
 \section{Baselines}
 
-Replicate (actually re-code in PyTorch) and run some baselines to which you will
-compare your final results.
+As a baseline we consider the performance of multiple adversarial example
+generation techniques. Below we list the performance of three methods. L-BFGS
+tries to solve an optimization problem of making the network classify the image as
+a target class, and minimizing the L2 distance from the original image. FGSM simply
+calculate the sign of the gradient towards the target class and takes a single 
+step in that direction. And JSMA calculates saliency maps to determine which pixels
+would contribute most to a mis-classification, then alters those pixels in the
+appropriate direction. All are tested on 5k MNIST examples, trying to fool
+a convolutional network that achieves 96\% accuracy.
+
+\begin{tabular}{l | l l l l}
+    Method & success percent & Average pixel change & Average image change & execution time\\ \hline
+    L-BFGS & 100 & 0.014 & 11.27 & 31.0 seconds \\
+    FGSM step .1 & 7.5 & 0.054 & 42.59 & 7.1 seconds \\
+    FGSM step .5 & 62.1 & 0.259 & 203.36 & 7.0 seconds \\
+    JSMA & UNk & UNK & UNK
+\end{tabular}
 
 \section{Initial Idea}
 
-Describe your initial idea: why it is new, interesting or useful. Include a description
-of your idea for a new architecture, task, or dataset. (Due for this homework.)
-This does not have to be final, you may find that as you collect results from your
-experiments, you will want to change your approach based on what works and what
-doesn't.
+Our idea is relatively simple. We plan to use the tested methods from adversarial example generation to
+create hash collisions for a hash neural network described in \cite{hash1}. As neural networks are 
+differentiable, we plan to, given a target hash, and a source document, produce a new document, close 
+to the source, that hash the same hash as the target document. 
 
+We will do this by using the target hash to compute a loss for the hash produced from the network on the
+source document, and follow the gradient using the above techniques to arrive at another document with the
+target hash.
 \bibliographystyle{unsrt}
 \bibliography{ref} 
 
