@@ -11,15 +11,12 @@ class MNIST_FGSM(MNISTAttack):
         super().__init__(model_class, weights_file,fgsm=True)
 
     def attack(self, x, y_true, y_target):
-        _x = Variable(torch.FloatTensor(x))
+        _x = Variable(torch.FloatTensor(x),requires_grad=True)
         _y_target = Variable(torch.LongTensor([y_target]))
         #print(y_true,y_target)
 
-        self._model.r.data = _x.data
         # Classification before modification 
         y_pred =  np.argmax(self._model(_x).data.numpy())
-
-        self._optimizer.zero_grad() 
 
         outputs = self._model(_x)
         xent_loss = self._loss_fn(outputs, _y_target) 
@@ -28,9 +25,9 @@ class MNIST_FGSM(MNISTAttack):
         #print(self._model.r.grad)
 
         epsilon = 0.5
-        x_grad = torch.sign(self._model.r.grad)
+        x_grad = torch.sign(_x.grad.data)
 
-        x_adversarial = torch.clamp(_x - epsilon * x_grad,0,1)
+        x_adversarial = Variable(torch.clamp(_x.data - epsilon * x_grad,0,1))
 
         '''
         print(_x.data)
@@ -40,7 +37,7 @@ class MNIST_FGSM(MNISTAttack):
         print(x_adversarial.data-_x.data)
         print('--------------------------------------')
         '''
-        self._model.r.data = x_adversarial.data
+
         #print('x_adv"s type is ',type(x_adversarial))
         y_pred_adversarial = np.argmax(self._model(x_adversarial).data.numpy())
 
