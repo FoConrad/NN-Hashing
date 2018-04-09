@@ -3,7 +3,7 @@ from .mnist_base import MNISTAttack
 import math
 from torch.autograd.gradcheck import zero_gradients
 
-
+# Code taken from https://github.com/ast0414/adversarial-example/blob/master/craft.py
 
 class MNIST_JSMA(MNISTAttack):
     def __init__(self, model_class, weights_file):
