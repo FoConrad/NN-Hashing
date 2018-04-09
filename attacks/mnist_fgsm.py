@@ -7,8 +7,9 @@ from torch.autograd import Variable
 from . import MNISTAttack
 
 class MNIST_FGSM(MNISTAttack):
-    def __init__(self, model_class, weights_file):
+    def __init__(self, model_class, weights_file, epsilon):
         super().__init__(model_class, weights_file,fgsm=True)
+        self._epsilon = epsilon
 
     def attack(self, x, y_true, y_target):
         _x = Variable(torch.FloatTensor(x),requires_grad=True)
@@ -24,10 +25,9 @@ class MNIST_FGSM(MNISTAttack):
         #self._optimizer.step()
         #print(self._model.r.grad)
 
-        epsilon = 0.5
         x_grad = torch.sign(_x.grad.data)
 
-        x_adversarial = Variable(torch.clamp(_x.data - epsilon * x_grad,0,1))
+        x_adversarial = Variable(torch.clamp(_x.data - self._epsilon * x_grad,0,1))
 
         '''
         print(_x.data)
