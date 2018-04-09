@@ -13,6 +13,7 @@ import torchvision
 from torchvision import transforms
 
 from models import CNN
+from attacks import MNIST_LBFGS
 
 # Adversarial example MNIST image generation code borrowed and inspired from:
 # https://github.com/akshaychawla/Adversarial-Examples-in-PyTorch
@@ -98,6 +99,8 @@ if __name__ == '__main__':
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--setup', action='store_true',
             help='train target model and generate 5k examples for testing')
+    parser.add_argument('--attack', type=str, choices=('lbfgs', 'fgsm', 'jsma'),
+            help='train target model and generate 5k examples for testing')
     args = parser.parse_args()
 
     base_dir = 'image_misc'
@@ -112,3 +115,13 @@ if __name__ == '__main__':
         print('Finished setting up... exiting')
         sys.exit(0)
 
+    if args.attack == 'lbfgs':
+        mnb = MNIST_LBFGS(partial(CNN, (28,28), 6, 10, lambda i: i),
+                cnn_model_weights)
+    elif args.attack == 'fgsm':
+        raise NotImplementedError
+    elif args.attack == 'jsma':
+        raise NotImplementedError
+    else:
+        raise ValueError('Please select --attack strategy')
+    mnb.attack_all(mnist_5k_examples)

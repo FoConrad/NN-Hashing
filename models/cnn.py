@@ -36,8 +36,8 @@ class CNN(nn.Module):
     def r(self):
         return self._data_delta
 
-    def forward(self, input_, ignore_data_err=True):
-        if not ignore_data_err:
+    def forward(self, input_):
+        if self._data_err:
             input_ += self._data_delta
             input_ = torch.clamp(input_, 0, 1)
         conv = self._conv(input_)
