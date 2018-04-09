@@ -6,12 +6,13 @@ from torch.nn import Parameter
 
 class CNN(nn.Module):
     def __init__(self, raw_input_size, feature_size, output_size, cudize,
-            data_err=False):
+            data_err=False,fgsm=False):
         super().__init__()
         self._raw_input_size = raw_input_size
         self._feature_size = feature_size
         self._cudize = cudize
         self._data_err = data_err
+        self._fgsm = fgsm
 
         self._conv = nn.Sequential(
                 nn.Conv2d(1, feature_size, kernel_size=5),
@@ -37,7 +38,9 @@ class CNN(nn.Module):
         return self._data_delta
 
     def forward(self, input_):
-        if self._data_err:
+        if self._fgsm:
+            input_ = self._data_delta
+        elif self._data_err:
             input_ += self._data_delta
             input_ = torch.clamp(input_, 0, 1)
         conv = self._conv(input_)

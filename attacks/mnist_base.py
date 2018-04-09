@@ -14,14 +14,14 @@ import torch.optim as optim
 from torch.autograd import Variable
 
 class MNISTAttack(object, metaclass=abc.ABCMeta):
-    def __init__(self, model_class, weights_file):
-        self._model = self.load_target_model(model_class, weights_file)
+    def __init__(self, model_class, weights_file,fgsm=False):
+        self._model = self.load_target_model(model_class, weights_file,fgsm)
         self._loss_fn = nn.CrossEntropyLoss()
         self._optimizer = optim.SGD(params=[self._model.r], lr=8e-3)
 
     @staticmethod
-    def load_target_model(model_class, weights_file):
-        model = model_class(data_err=True)
+    def load_target_model(model_class, weights_file,fgsm):
+        model = model_class(data_err=True,fgsm=fgsm)
         weights = {}
         try:
             with open(weights_file, 'rb') as f:
@@ -60,7 +60,7 @@ class MNISTAttack(object, metaclass=abc.ABCMeta):
             # Add a channel dimension
             x = x.reshape(1, *x.shape)
             y_target = random.choice(list(set(range(10)) - set([y_true])))
-            noise, y_pred, y_pred_adversarial = self.attack(x, y_true, y_target, regularization="l2")
+            noise, y_pred, y_pred_adversarial = self.attack(x, y_true, y_target)
 
             if y_pred == y_true:
                 # store

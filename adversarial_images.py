@@ -13,7 +13,7 @@ import torchvision
 from torchvision import transforms
 
 from models import CNN
-from attacks import MNIST_LBFGS
+from attacks import MNIST_LBFGS,MNIST_FGSM
 
 # Adversarial example MNIST image generation code borrowed and inspired from:
 # https://github.com/akshaychawla/Adversarial-Examples-in-PyTorch
@@ -119,7 +119,8 @@ if __name__ == '__main__':
         mnb = MNIST_LBFGS(partial(CNN, (28,28), 6, 10, lambda i: i),
                 cnn_model_weights)
     elif args.attack == 'fgsm':
-        raise NotImplementedError
+        mnb = MNIST_FGSM(partial(CNN, (28,28), 6, 10, lambda i: i),
+                cnn_model_weights)
     elif args.attack == 'jsma':
         raise NotImplementedError
     else:
