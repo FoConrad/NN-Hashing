@@ -110,11 +110,12 @@ would contribute most to a mis-classification, then alters those pixels in the
 appropriate direction. All are tested on 5k MNIST examples, trying to fool
 a convolutional network that achieves 96\% accuracy.
 
-\begin{tabular}{l | l l l}
-    Method & Attack success percent & Average pixel perturbation & Average image perturbation \\ \hline
-    L-BFGS & .2 & 12 & 12 \\
-    FGSM & .2 & 12 & 12 \\
-    JSMA & .2 & 14 & 42
+\begin{tabular}{l | l l l l}
+    Method & success percent & Average pixel change & Average image change & execution time\\ \hline
+    L-BFGS & 100 & 0.014 & 11.27 & 31.0 seconds \\
+    FGSM step .1 & 7.5 & 0.054 & 42.59 & 7.1 seconds \\
+    FGSM step .5 & 62.1 & 0.259 & 203.36 & 7.0 seconds \\
+    JSMA & UNk & UNK & UNK
 \end{tabular}
 
 \section{Initial Idea}
