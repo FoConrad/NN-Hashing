@@ -89,6 +89,21 @@ and audio \cite{policy,intriguing,audio}. There have also been numerous techniqu
 for defense against these attacks, some based on robust optimization, and others
 on ensemble models \cite{robust,ensemble}.
 
+Because the model for neural network hashing is known, same model and parameters can be used for white box attacks. To generate hash collisions, targeted attacks are needed so that outputs will match random existing hashes in the dataset. 
+
+We use three gradient-based white box targeted attack methods, L-BFGS, T-FGSM, and JSMA.
+
+L-BFGS
+tries to find the adversarial input as a box-constraint minimization problem. L-BFGS optimization is used to minimize L2 distance between the image and the adversarial example while keeping a constraint on the class label for the generated image.
+
+FAST GRADIENT SIGN METHOD (FGSM)
+is a single step attack process. It uses the sign of the gradient of the loss function, w.r.t. to the image to find the adversarial perturbation. 
+Targeted FGSM uses gradient w.r.t. to the target class to find the perturbation.
+	
+JACOBIAN-BASED SALIENCY MAP ATTACK (JSMA)
+estimates the saliency of each image pixel w.r.t to the classification output, and modifies those pixels which are most salient. This is a targeted attack, and saliency is designed to find the pixel which increases the classifier’s output for the target class while tending to decrease the output for other classes.
+
+
 \subsection{Neural Hash Functions}
 
 Neural network popularity has led to many unique uses for them. Some in already
