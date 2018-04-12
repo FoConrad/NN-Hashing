@@ -102,7 +102,7 @@ including \cite{hash2} have also proposed using neural networks to create
 one-way hash functions.
 
 \section{Baselines}
-We use three gradient-based white box targeted attack methods, L-BFGS, T-FGSM, and JSMA.
+We use two gradient-based white box targeted attack methods, L-BFGS, and T-FGSM.
 
 L-BFGS
 tries to find the adversarial input as a box-constraint minimization problem. L-BFGS optimization is used to minimize L2 distance between the image and the adversarial example while keeping a constraint on the class label for the generated image.
@@ -111,9 +111,6 @@ FAST GRADIENT SIGN METHOD (FGSM)
 is a single step attack process. It uses the sign of the gradient of the loss function, w.r.t. to the image to find the adversarial perturbation. 
 Targeted FGSM uses gradient w.r.t. to the target class to find the perturbation.
 	
-JACOBIAN-BASED SALIENCY MAP ATTACK (JSMA)
-estimates the saliency of each image pixel w.r.t to the classification output, and modifies those pixels which are most salient. This is a targeted attack, and saliency is designed to find the pixel which increases the classifier’s output for the target class while tending to decrease the output for other classes.
-
 As a baseline we consider the performance of the above adversarial example
 generation techniques.  All are tested on 5k MNIST examples, trying to fool
 a convolutional network that achieves 96\% accuracy.
@@ -123,7 +120,6 @@ a convolutional network that achieves 96\% accuracy.
     L-BFGS & 100 & 0.014 & 11.27 & 31.0 seconds \\
     FGSM step .1 & 7.5 & 0.054 & 42.59 & 7.1 seconds \\
     FGSM step .5 & 62.1 & 0.259 & 203.36 & 7.0 seconds \\
-    JSMA & UNk & UNK & UNK & UNK
 \end{tabular}
 
 \section{Initial Idea}
