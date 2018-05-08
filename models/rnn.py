@@ -5,12 +5,11 @@ from torch.nn import Parameter
 
 class RNN(nn.Module):
     def __init__(self, raw_input_size, hidden_sizes, output_size, cudize,
-            data_err=False, gen_length=0):
+                 gen_length=0):
         super(RNN, self).__init__()
         self._raw_input_size = raw_input_size
         self._output_size = output_size
         self._cudize = cudize
-        self._data_err = data_err
 
         act = nn.Tanh()
         last_size = raw_input_size + output_size
@@ -23,9 +22,8 @@ class RNN(nn.Module):
 
         self._features = nn.Sequential(*sequentials)
         self._out = nn.Sigmoid()
-        if data_err:
-            self._data_delta = Parameter(
-                    data=self._cudize(torch.zeros(gen_length, raw_input_size)))
+        self._data_delta = Parameter(
+            data=self._cudize(torch.zeros(gen_length, raw_input_size)))
 
     def cudize(self):
         return self._cudize(self)

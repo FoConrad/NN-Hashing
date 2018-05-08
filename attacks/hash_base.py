@@ -15,10 +15,10 @@ class HashBaseAttack(object, metaclass=abc.ABCMeta):
         self._source = {'data': self.read_file(source)} if source else None
         self._output_name = output
         if source is None:
-            self._model = model_class(data_err=False,
-                    gen_length=len(self._target['data'])).cudize()
+            self._model = model_class(
+                gen_length=len(self._target['data'])).cudize()
         else:
-            self._model = model_class(data_err=True,
+            self._model = model_class(
                 gen_length=len(self._source['data'])).cudize()
             self._source['output'] = Variable(self._model(self._source['data'],
                 ignore_data_err=True).data, requires_grad=False)
