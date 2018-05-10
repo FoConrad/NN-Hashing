@@ -21,8 +21,8 @@ class HashL2Attack(HashBaseAttack):
         return ret * self._reg_coeff
 
     def iterate(self, steps=0):
-        self.report_hash(self._source['output'], 'original source hash')
-        self.report_hash(self._target['output'], 'target hash')
+        start_hash = self.report_hash(self._source['output'], 'original source hash')
+        target_hash = self.report_hash(self._target['output'], 'target hash')
 
         success = False
         for iteration in range(steps) if steps else itertools.count():
@@ -43,3 +43,5 @@ class HashL2Attack(HashBaseAttack):
             self._optimizer.step()
 
         print('\n...{}'.format('success' if success else 'failure'))
+
+        return start_hash,target_hash 

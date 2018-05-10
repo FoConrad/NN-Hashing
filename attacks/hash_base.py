@@ -53,6 +53,7 @@ class HashBaseAttack(object, metaclass=abc.ABCMeta):
         f = lambda i: str(int(i + .5))
         o = hex(int(reduce(add, map(f, raw_list)), 2))
         print('{} - {}'.format(o, label), **kwargs)
+        return o
 
     @staticmethod
     def check_eq(first, second):
@@ -88,7 +89,8 @@ class HashBaseAttack(object, metaclass=abc.ABCMeta):
         else:
             target = self.read_file(target)
             target_output = self._model(target, ignore_data_err=True)
-        self.report_hash(target_output, 'target hash')
+        target_hash = self.report_hash(target_output, 'target hash')
+        return target_hash
 
     @abc.abstractmethod
     def loss_reg(self, r):
