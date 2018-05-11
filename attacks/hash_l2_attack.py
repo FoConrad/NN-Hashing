@@ -25,6 +25,7 @@ class HashL2Attack(HashBaseAttack):
         target_hash = self.report_hash(self._target['output'], 'target hash')
 
         success = False
+        final_data = None
         for iteration in range(steps) if steps else itertools.count():
             self._optimizer.zero_grad()
             outputs = self._model(self._source['data'], ignore_data_err=False)
@@ -33,7 +34,7 @@ class HashL2Attack(HashBaseAttack):
             if self.check_eq(self._target['output'], outputs):
                 success = True
                 self.report_hash(outputs, 'step... {} *'.format(iteration))
-                self.report_successful(self._source['param'], self._model.r)
+                final_data = self.report_successful(self._source['param'], self._model.r)
                 self.write_output(self._model.r)
                 break
             if iteration % 10 == 0:
@@ -44,4 +45,4 @@ class HashL2Attack(HashBaseAttack):
 
         print('\n...{}'.format('success' if success else 'failure'))
 
-        return start_hash,target_hash 
+        return start_hash,target_hash,final_data 

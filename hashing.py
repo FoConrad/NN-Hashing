@@ -55,13 +55,14 @@ def main(args=None):
     
     target_hash = None
     start_hash = None
+    data = None
     
     if args.source:
-        start_hash,target_hash = att.iterate(args.iters)
+        start_hash,target_hash,data = att.iterate(args.iters)
     else:
         start_hash = att.query()
 
-    return start_hash,target_hash
+    return start_hash,target_hash,data
 
 if __name__ == '__main__':
     main()

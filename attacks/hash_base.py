@@ -70,6 +70,7 @@ class HashBaseAttack(object, metaclass=abc.ABCMeta):
             np.mean(low), np.std(low), np.min(low), np.max(low)))
         print('High mean: {:.4f}, std: {:.4f}, min: {:.4f}, max: {:.4f}'.format(
             np.mean(high), np.std(high), np.min(high), np.max(high)))
+        return data
 
     def write_output(self, r):
         if self._output_name is None:
