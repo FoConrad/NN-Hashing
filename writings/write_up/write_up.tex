@@ -113,8 +113,21 @@ one-way hash functions.
 
 \section{Neural Hash Function}
 
-The model that we will be attacking here, for the purpose of demonstrating issues 
-with neural network cryptographic hash functions, is that described in \cite{hash1}.
+The model that we will be attacking here, for the purpose of demonstrating
+issues with neural network cryptographic hash functions, is that described in
+\cite{hash1}.  Here we have a two-layer recurrent neural network (RNN) that
+takes 512 bits as input, and produces 128 bit output through two linear
+transformations with sigmoid activation functions. Weights of this network are
+randomly initialized, but held constant there after to ensure the hash function
+is deterministic. If there is another 512 bit block to read, this is
+concatenated with the 128 bit output of the previous block, to produce another
+128-bit output. 
+
+See Figure \ref{fig:hashNN} for graphical representation of the hashing
+process. It is worth noting that the neural network actually takes 640 bits
+as input, where, for the first 512 bit block from the input file, the last
+128 bits can be simply zeros. Once every block in the input is processed, the 
+final 128 bit output is the hash for the input document.
 
 %%% Separate image locations
 %\begin{figure}[t]
@@ -150,14 +163,44 @@ with neural network cryptographic hash functions, is that described in \cite{has
 \end{figure}
 
 
-
-Look at the nn hash figure in Figure \ref{fig:hashNN}.
-
 \section{Attack Approach}
 
-Look at image in Figure \ref{fig:model}.
+Our attack approach starts with a target document, or just a target hash, to
+find find a collision for. Given a target document, if there is one, the hash
+is produced by feeding the document through the hash function described above.
+
+Next, a start (or source) document is needed which will be converted into the
+hash collision.  This can be arbitrary, or a specific document so that the
+collision found will be somewhat similar to the source document. Here again we
+can see a similarity with adversarial example generation, in that we would like
+the collision found to be as close to the start document as possible (as an
+adversarial is sought to be close to some valid input).
+
+Then source document is fed into the hash neural network to produce a source hash.
+This is then compared with the target hash in a loss function, to produce a loss
+value of which to calculate the gradient. Here the mean squared error (MSE) loss
+is used, bit wise between the target and source hash. An extra loss term is
+added to keep the source input values close to one or zero (as they represent bits).
+This loss is back-propagated until at the final layer the gradient of the loss
+with respect to the input is acquired.
+
+This calculated gradient of the source document is then added to the source
+input, scaled by a learning rate. The new source document is then hashed again
+to check if the hash value matches the target hash, else the gradient is
+calculated again.  This model for finding a hash collision can be seen
+graphically in Figure \ref{fig:model}.
 
 \section{Results}
+
+\subsection{Pseudo-collisions}
+While our method is able to produce documents that hash to the target hash, these
+aren't quite "true" collisions in that the source document contains values that
+are not exactly 0 or 1. These values center around 0 and 1 but vary to some degree
+to that the source document could not actually be written to disk as a string of 0's
+and 1's without changing the source hash some. This is the reason for the added
+loss term, which is $l'(r) = (r (r - 1))^2$, where $r$ is the source document
+plus the gradient. This function  forms a 'w' with zero loss when $r = 0$ or
+$r = 1$ and pushed the source document bits towards a valid value.
 
 \section{Conclusion}
 
