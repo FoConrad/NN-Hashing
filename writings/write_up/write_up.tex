@@ -20,7 +20,10 @@
 \usepackage{amsfonts}       % blackboard math symbols
 \usepackage{nicefrac}       % compact symbols for 1/2, etc.
 \usepackage{microtype}      % microtypography
+\usepackage{graphicx}
 \usepackage{natbib}
+
+\graphicspath{{figures/}}
 
 \title{Cracking Neural Network Hashes with Adversarial Examples}
 
@@ -64,12 +67,13 @@
     their efficacy.
 \end{abstract}
 
-\section{Literature Review}
+\section{Introduction}
+
+\section{Related Work}
 
 The two areas of literature that concern our project are \emph{adversarial examples},
 and \emph{Neural hash functions}.
 
-\subsection{Adversarial Examples}
 Interest in adversarial examples started around the time of their description
 in \cite{intriguing}. Here authors discovered that it is possible to craft
 example images that look very much like one class, yet are confidently classified
@@ -92,8 +96,6 @@ on ensemble models \cite{robust,ensemble}.
 Because the model for neural network hashing is known, same model and parameters can be used for white box attacks. To generate hash collisions, targeted attacks are needed so that outputs will match random existing hashes in the dataset. 
 
 
-\subsection{Neural Hash Functions}
-
 Neural network popularity has led to many unique uses for them. Some in already
 solved domains. In \cite{hash1} an RNN is used to process data and produce
 a fixed length hash value. This work measured the entropy of the hash function
@@ -101,39 +103,52 @@ by how many digits in the hash hexadecimal code were changed. Other authors,
 including \cite{hash2} have also proposed using neural networks to create
 one-way hash functions.
 
-\section{Baselines}
-We use two gradient-based white box targeted attack methods, L-BFGS, and T-FGSM.
+\section{Neural Hash Function}
 
-L-BFGS
-tries to find the adversarial input as a box-constraint minimization problem. L-BFGS optimization is used to minimize L2 distance between the image and the adversarial example while keeping a constraint on the class label for the generated image.
+%%% Separate image locations
+%\begin{figure}[t]
+    %\centering
+    %\includegraphics[width=90mm]{hash_nn_architecture}
+    %\caption{A simple caption} 
+    %\label{fig:hashNN}
+%\end{figure}
 
-FAST GRADIENT SIGN METHOD (FGSM)
-is a single step attack process. It uses the sign of the gradient of the loss function, w.r.t. to the image to find the adversarial perturbation. 
-Targeted FGSM uses gradient w.r.t. to the target class to find the perturbation.
-	
-As a baseline we consider the performance of the above adversarial example
-generation techniques.  All are tested on 5k MNIST examples, trying to fool
-a convolutional network that achieves 96\% accuracy.
+%\begin{figure}[b]
+    %\centering
+    %\includegraphics[width=90mm]{model_diagram}
+    %\caption{Collision attack overview} 
+    %\label{fig:model}
+%\end{figure}
 
-\begin{tabular}{l | l l l l}
-    Method & success percent & Average pixel change & Average image change & execution time\\ \hline
-    L-BFGS & 100 & 0.014 & 11.27 & 31.0 seconds \\
-    FGSM step .1 & 7.5 & 0.054 & 42.59 & 7.1 seconds \\
-    FGSM step .5 & 62.1 & 0.259 & 203.36 & 7.0 seconds \\
-\end{tabular}
 
-\section{Initial Idea}
+%%% Images side-by-side with minipages to save room.
+\begin{figure}[t]
+    \centering
+    \begin{minipage}{.5\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{hash_nn_architecture}
+        \caption{Hash function algorithm presented in \cite{hash1}}
+        \label{fig:hashNN}
+    \end{minipage}%
+    \begin{minipage}{.5\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{model_diagram}
+        \caption{Collision attack overview} 
+        \label{fig:model}
+    \end{minipage}
+\end{figure}
 
-Our idea is relatively simple. We plan to use the tested methods from adversarial example generation to
-create hash collisions for a hash neural network described in \cite{hash1}. As neural networks are 
-differentiable, we plan to, given a target hash, and a source document, produce a new document, close 
-to the source, that hash the same hash as the target document. 
-Ultimately we would like to show that RNNs are not a suitable choice for hash functions as they are
-differentiable. 
 
-We will do this by using the target hash to compute a loss for the hash produced from the network on the
-source document, and follow the gradient using the above techniques to arrive at another document with the
-target hash.
+
+Look at the nn hash figure in Figure \ref{fig:hashNN}.
+
+\section{Attack Approach}
+
+Look at image in Figure \ref{fig:model}.
+
+\section{Results}
+
+\section{Conclusion}
 
 \bibliographystyle{unsrt}
 \bibliography{ref} 
