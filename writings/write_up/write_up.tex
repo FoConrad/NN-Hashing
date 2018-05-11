@@ -68,33 +68,41 @@
 \end{abstract}
 
 \section{Introduction}
+In computer security a cryptographic hash function is a function used to
+reduced documents into a fixed size hash (often times represented by a
+hexadecimal string).  The application for these range from download document
+verification, to storage of passwords \cite{crypoHash}. One of the definiong
+properties of this class of functions is that they are one-way. This means that
+given a hash of a document, it is infeasible to find a document (a hash
+collision) that produces the same hash (whether it is the same as the original
+or not) \cite{crypoHash}.  This is particularly import if a company stores
+password hashes. If these are lost to an adversary, it is important that the
+adversary cannot find another password that produces the same hash, as then
+they could use this to authenticate as one of the users.
+
+There has been a recent increase in using machine learning to solve, or as part
+of a solution, to systems problems. For example in \cite{learnedIndex}, the
+authors use neural networks to learn the index distribution for data storage,
+to replace B-Trees indexes for data retrieval. The problem of finding good
+cryptographic using neural networks has also been proposed in multiple papers
+\cite{hash1, hash2}. In this work we show that these hash functions
+fundamentally do not satisfy the one-way requirement for cryptographic hashes,
+as they expose sensitive information through the gradients of the network that
+can be exploited to find hash collisions.
 
 \section{Related Work}
 
-The two areas of literature that concern our project are \emph{adversarial examples},
-and \emph{Neural hash functions}.
+Related to our approach of using the gradients of a neural network to alter
+the input, is the work of finding adversarial examples that when fed to a
+neural network, produce an unexpected output classification \cite{intriguing}.
 
-Interest in adversarial examples started around the time of their description
-in \cite{intriguing}. Here authors discovered that it is possible to craft
-example images that look very much like one class, yet are confidently classified
-as another by a neural network.
-
-After this result, Goodfellow et. al. developed a faster method of generating
-adversarial examples and studied some of their properties in \cite{explaining}.
-One of the original thoughts as to the reason for these was due to un-smooth 
-loss surfaces, which led to a proposed defense though distillation \cite{distil}.
-
-Though distillation seemed promising, it turned out it was only performing well
-on simple attacks. In fact, adversarial examples were shown to be relatively
-robust, living in about 25 dimensions of the input data space \cite{space}.
-
-Many attacks using adversarial examples have been performed on RL policies, vision,
-and audio \cite{policy,intriguing,audio}. There have also been numerous techniques
-for defense against these attacks, some based on robust optimization, and others
-on ensemble models \cite{robust,ensemble}.
-
-Because the model for neural network hashing is known, same model and parameters can be used for white box attacks. To generate hash collisions, targeted attacks are needed so that outputs will match random existing hashes in the dataset. 
-
+This idea was first popularized in the work \cite{intriguing}; other methods
+for generating these examples soon followed \cite{explaining}; and even defenses
+for neural networks against being susceptible to these attacks emerged, such
+as \cite{robust, ensemble, distil}. While effective to some degree, it was shown
+in \cite{space} that adversarial examples exist in a large number of dimensions
+of the input space, suggesting they may be a problem on a more fundamental 
+level.
 
 Neural network popularity has led to many unique uses for them. Some in already
 solved domains. In \cite{hash1} an RNN is used to process data and produce
@@ -104,6 +112,9 @@ including \cite{hash2} have also proposed using neural networks to create
 one-way hash functions.
 
 \section{Neural Hash Function}
+
+The model that we will be attacking here, for the purpose of demonstrating issues 
+with neural network cryptographic hash functions, is that described in \cite{hash1}.
 
 %%% Separate image locations
 %\begin{figure}[t]
