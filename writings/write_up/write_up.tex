@@ -191,6 +191,9 @@ calculated again.  This model for finding a hash collision can be seen
 graphically in Figure \ref{fig:model}.
 
 \section{Results}
+We evaluate the performance of our model, the successful rate to generate pseudo-collisions and  the average time it takes. The first factor we take into consideration is the size of source file. Figures \ref{fig:docsize} shows the model achieves 100\% success rate when the size of source doc reaches 512 bytes. When size of source document is too small, the model lacks of information and value to change to reach the target hash, since our model does not add new value to the source document. It also shows the larger the source doc, the longer it takes to generate the collisions. When there is no restriction on choosing source documents, a documents with random 512 bytes gives the best performance.
+
+Figure \ref{fig:lrate} shows the impact of learning rate on our model's performance. When our model cannot generate collisions within 1000 steps, it will be counted as a failure attempt. When learning rate is less than 1.0 or larger than 1.5, the model will have the risk of getting stuck in the local minimums, or failure to converge in time. The defualt learning rate is set to 1.
 
 \subsection{Pseudo-collisions}
 While our method is able to produce documents that hash to the target hash, these
@@ -202,11 +205,7 @@ loss term, which is $l'(r) = (r (r - 1))^2$, where $r$ is the source document
 plus the gradient. This function  forms a 'w' with zero loss when $r = 0$ or
 $r = 1$ and pushed the source document bits towards a valid value.
 
-Our model has a regularization coefficient parameter, which decides how much the model wants to force the source documents bits towards a valid value. However, the difference on distribution of the final source documents value is minimal with different regularization coefficients, which can be seen in Figure \ref{fig:regcoeff}.
-
-We evaluate the performance of our model, the successful rate to generate pseudo-collisions and  the average time it takes. The first factor we take into consideration is the size of source file. Figures \ref{fig:docsize} shows the model achieves 100\% success rate when the size of source doc reaches 512 bytes. When size of source document is too small, the model lacks of information and value to change to reach the target hash, since our model does not add new value to the source document. It also shows the larger the source doc, the longer it takes to generate the collisions. When there is no restriction on choosing source documents, a documents with random 512 bytes gives the best performance.
-
-Figure \ref{fig:lrate} shows the impact of learning rate on our model's performance. When our model cannot generate collisions within 1000 steps, it will be counted as a failure attempt. When learning rate is less than 1.0 or larger than 1.5, the model will have the risk of getting stuck in the local minimums, or failure to converge in time. The defualt learning rate is set to 1.
+Controlling the above additional loss term is a regularization coefficient parameter, which decides how much the model wants to force the source documents bits towards a valid value. However, the difference on distribution of the final source documents value is minimal with different regularization coefficients, which can be seen in Figure \ref{fig:regcoeff}.
 
 The regularization coefficient has minimal impact on performance when it is less then 0.01 which can be seen in Figure \ref{fig:regcoeff}. When regularization coefficient is too large, the model push the values of final source document to be really close to 0 or 1 with full force. It causes the model fail to converge. Figure \ref{fig:datadist} shows regularization coefficient does not make huge difference on the distribution of values of final source document.The coefficient does not have significant influence on average time to generate collisions. Therefore, as long as the coefficient is less than 0.01, the model will perform well.
 
@@ -215,13 +214,14 @@ The regularization coefficient has minimal impact on performance when it is less
 %%% Images side-by-side with minipages to save room.
 \begin{figure}[t]
     \centering
-    \begin{minipage}{.5\textwidth}
+    \begin{minipage}{.45\textwidth}
         \centering
         \includegraphics[width=\textwidth]{data_distribution}
         \caption{Pseudo-collisions value distribution with different regularization coefficient} 
         \label{fig:datadist}
     \end{minipage}%
-    \begin{minipage}{.5\textwidth}
+    \hfill
+    \begin{minipage}{.45\textwidth}
         \centering
         \includegraphics[width=\textwidth]{source_doc_size}
         \caption{Performance with different sizes of source docs}
@@ -231,13 +231,14 @@ The regularization coefficient has minimal impact on performance when it is less
 
 \begin{figure}[t]
     \centering
-    \begin{minipage}{.5\textwidth}
+    \begin{minipage}{.45\textwidth}
         \centering
         \includegraphics[width=\textwidth]{learning_rate}
         \caption{Performance with different learning rates} 
         \label{fig:lrate}    
     \end{minipage}%
-    \begin{minipage}{.5\textwidth}
+    \hfill
+    \begin{minipage}{.45\textwidth}
         \centering
         \includegraphics[width=\textwidth]{reg_coeff}
         \caption{Performance with different regularization coefficient}
@@ -247,6 +248,13 @@ The regularization coefficient has minimal impact on performance when it is less
 
 
 \section{Conclusion}
+We have demonstrated that neural network hash functions, at leas the one that
+we targeted, are susceptible to attacks based on the information they expose in
+their differentiability. While we were only able to generate pseudo-collisions,
+we think it is more than possibly, with a little more though into the
+additional loss term $l'$, to generate true hash collisions for this target
+architecture. We also believe that other neural network hash functions will be
+susceptible to similar attacks.
 
 \bibliographystyle{unsrt}
 \bibliography{ref} 
