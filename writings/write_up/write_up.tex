@@ -202,6 +202,40 @@ loss term, which is $l'(r) = (r (r - 1))^2$, where $r$ is the source document
 plus the gradient. This function  forms a 'w' with zero loss when $r = 0$ or
 $r = 1$ and pushed the source document bits towards a valid value.
 
+%%% Images side-by-side with minipages to save room.
+\begin{figure}[t]
+    \centering
+    \begin{minipage}{.5\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{source_doc_size}
+        \caption{Performance for different sizes of source docs}
+        \label{fig:docsize}
+    \end{minipage}%
+    \begin{minipage}{.5\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{learning_rate}
+        \caption{Performance for different learning rates} 
+        \label{fig:lrate}
+    \end{minipage}
+\end{figure}
+
+\begin{figure}[t]
+    \centering
+    \begin{minipage}{.5\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{reg_coeff}
+        \caption{Performance for different regularization coefficient}
+        \label{fig:regcoeff}
+    \end{minipage}%
+    \begin{minipage}{.5\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{data_distribution}
+        \caption{Pseudo-collisions value distribution for different regularization coefficient} 
+        \label{fig:datadist}
+    \end{minipage}
+\end{figure}
+
+
 \section{Conclusion}
 
 \bibliographystyle{unsrt}
